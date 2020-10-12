@@ -4,6 +4,7 @@ import traceback
 import os
 import mimetypes
 
+
 class HttpServer():
 
     @staticmethod
@@ -54,9 +55,8 @@ class HttpServer():
 
         Then you would return "/images/sample_1.png"
         """
-
-        return "TODO: COMPLETE THIS"  # TODO
-
+        item_list = request.split()
+        return item_list[1]
 
     @staticmethod
     def get_mimetype(path):
@@ -86,9 +86,15 @@ class HttpServer():
         """
 
         if path.endswith('/'):
-            return b"text/plain"
+            return b"text/html"
+        elif path.endswith('.png'):
+            return b"image/png"
+        elif path.endswith('.jpg'):
+            return b"image/jpeg"
+        elif path.endswith('.html'):
+            return b"text/html"
         else:
-            return b"TODO: FINISH THE REST OF THESE CASES"  # TODO
+            return b"text/plain"
 
     @staticmethod
     def get_content(path):
@@ -123,8 +129,22 @@ class HttpServer():
             # The file `webroot/a_page_that_doesnt_exist.html`) doesn't exist,
             # so this should raise a FileNotFoundError.
         """
-
-        return b"Not implemented!"  # TODO: Complete this function.
+        full_path = "webroot" + path
+        if not os.path.exists(full_path):
+            raise FileNotFoundError
+        if os.path.isdir(full_path):
+            dir_contents = os.listdir(full_path)
+            content_to_return = '<http><body>'
+            for item in dir_contents:
+                for_link = item
+                if os.path.isdir(os.path.join(full_path, item)):
+                    for_link += "/"
+                content_to_return += f'<h2><a href="{for_link}">{for_link}</a></h2>'
+            content_to_return += '</body></http>'
+            return content_to_return.encode()
+        if os.path.isfile(full_path):
+            with open(full_path, "rb") as f:
+                return f.read()
 
     def __init__(self, port):
         self.port = port
